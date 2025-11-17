@@ -413,6 +413,6 @@ Contributions are welcome! Feel free to:
 
 <div align="center">
   <hr>
-  <p><i>Transform your PDFs with enterprise-grade security and interactivity</i></p>
-  <p><b>PDmFer</b> - where PDF meets power</p>
+  <p><i>PDmFer</i></p>
+  <p><b></b>PDF phishing at your phingertips</p>
 </div>
