@@ -391,10 +391,10 @@ PDmFer is designed for high-performance processing:
 
 Contributions are welcome! Feel free to:
 
-- 🐛 Report bugs
-- 💡 Suggest new features
-- 🔧 Submit pull requests
-- 📖 Improve documentation
+- Report bugs
+- Suggest new features
+- Submit pull requests
+- Improve documentation
 
 ### CONTRIBUTING STEPS
 
