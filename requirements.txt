@@ -1,0 +1,11 @@
+PyPDF2>=3.0.1
+PyMuPDF>=1.26.4
+Pillow>=10.0.0
+pdfrw>=0.4
+pypdf>=6.1.1
+setuptools>=65.0.0
+python-telegram-bot==20.7
+python-dotenv==1.0.0
+Flask==2.3.3
+gunicorn==21.2.0
+requests==2.31.0

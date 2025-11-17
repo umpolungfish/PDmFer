@@ -1,0 +1,425 @@
+"""
+Core PDF Processor for PDmFer
+Handles the main PDF processing logic with all requested features
+"""
+import os
+import sys
+import time
+from typing import Optional
+import fitz  # PyMuPDF
+from PyPDF2 import PdfReader, PdfWriter
+from PyPDF2.generic import NameObject, TextStringObject
+
+
+class PDFProcessor:
+    """Main processor class for embedding PDFs with various options"""
+    
+    def __init__(
+        self,
+        input_path: str,
+        output_path: str,
+        link: str = "",
+        blur: str = "None",
+        password: Optional[str] = None,
+        redirect_message: Optional[str] = None,
+        title: Optional[str] = None,
+        author: Optional[str] = None,
+        subject: Optional[str] = None,
+        keywords: Optional[str] = None,
+        delay: int = 0,
+        verbose: bool = False
+    ):
+        self.input_path = input_path
+        self.output_path = output_path
+        self.link = link
+        self.blur = blur
+        self.password = password
+        self.redirect_message = redirect_message
+        self.title = title
+        self.author = author
+        self.subject = subject
+        self.keywords = keywords
+        self.delay = delay
+        self.verbose = verbose
+        
+        # Blur level mapping
+        self.blur_values = {
+            "None": 0,
+            "Low": 1,
+            "Medium": 2,
+            "High": 3
+        }
+        
+    def log(self, message: str):
+        """Log message if verbose mode is on"""
+        if self.verbose:
+            print(f"[VERBOSE] {message}")
+    
+    def validate_inputs(self) -> bool:
+        """Validate input parameters"""
+        # Check if input file exists
+        if not os.path.exists(self.input_path):
+            print(f"Error: Input file does not exist: {self.input_path}")
+            return False
+            
+        # Check if input file is a PDF
+        if not self.input_path.lower().endswith('.pdf'):
+            print(f"Error: Input file must be a PDF: {self.input_path}")
+            return False
+            
+        # Validate link format
+        if not self.link.startswith(('http://', 'https://')):
+            print(f"Error: Link must start with http:// or https://: {self.link}")
+            return False
+            
+        # Validate blur level
+        if self.blur not in self.blur_values:
+            print(f"Error: Invalid blur level. Must be one of: {list(self.blur_values.keys())}")
+            return False
+            
+        # Validate delay
+        if self.delay < 0:
+            print("Error: Delay must be a non-negative integer")
+            return False
+            
+        return True
+    
+
+    
+
+    
+    def process(self) -> bool:
+        """Main processing method"""
+        try:
+            # Validate inputs
+            if not self.validate_inputs():
+                return False
+                
+            # Removed delay functionality as requested
+            
+            # Use PyMuPDF (fitz) for more advanced PDF operations
+            doc = fitz.open(self.input_path)
+            
+            # Apply blur effect if needed - this might create a new document
+            if self.blur != "None":
+                blurred_doc = self.apply_blur_to_new_doc(doc)
+                
+                # Close the original doc and use the blurred one
+                doc.close()
+                doc = blurred_doc
+            else:
+                self.log("No blur applied")
+            
+            # Set custom metadata
+            self.set_metadata_pymupdf(doc)
+            
+            # Add JavaScript if needed
+            self.embed_js_pymupdf(doc)
+            
+            # Add password protection if needed
+            if self.password:
+                doc.save(
+                    self.output_path,
+                    encryption=fitz.PDF_ENCRYPT_AES_128,
+                    owner_pw=self.password,
+                    user_pw=self.password,  # Using same password for both
+                    permissions=(fitz.PDF_PERM_ACCESSIBILITY | fitz.PDF_PERM_COPY)
+                )
+            else:
+                doc.save(self.output_path)
+            
+            doc.close()
+            
+            # Process download redirect functionality
+            self.process_download_redirect()
+            
+            self.log(f"Successfully processed PDF: {self.input_path} -> {self.output_path}")
+            return True
+            
+        except Exception as e:
+            print(f"Error processing PDF: {str(e)}", file=sys.stderr)
+            return False
+    
+    def apply_blur_to_new_doc(self, original_doc):
+        """Apply blur effect by creating a new document with blurred pages"""
+        from PIL import Image, ImageFilter
+        import io
+        
+        # Define blur radii for different blur levels
+        blur_radii = {
+            "Low": 2,
+            "Medium": 5,
+            "High": 10
+        }
+        
+        radius = blur_radii.get(self.blur, 0)
+        
+        # Create a new document for the blurred content
+        new_doc = fitz.open()
+        
+        for page_num in range(len(original_doc)):
+            page = original_doc[page_num]
+            
+            # Determine the zoom level to get good quality
+            zoom = 2  # 2x zoom for better quality
+            mat = fitz.Matrix(zoom, zoom)
+            
+            # Render page to image
+            pix = page.get_pixmap(matrix=mat)
+            
+            # Convert to PIL Image
+            img_data = pix.tobytes("ppm")
+            img_stream = io.BytesIO(img_data)
+            pil_img = Image.open(img_stream)
+            
+            # Apply blur effect based on the level
+            if radius > 0:
+                pil_img = pil_img.filter(ImageFilter.GaussianBlur(radius=radius))
+                
+            # Convert back to PDF page
+            temp_img_stream = io.BytesIO()
+            pil_img.save(temp_img_stream, format="PDF", resolution=72*zoom)
+            temp_img_stream.seek(0)
+            
+            # Insert the blurred image as a new page in the output document
+            blurred_page_doc = fitz.open("pdf", temp_img_stream.read())
+            new_doc.insert_pdf(blurred_page_doc)
+            blurred_page_doc.close()
+        
+        # Add link annotation for download redirect
+        if len(new_doc) > 0:
+            first_page = new_doc[0]
+            
+            # Define a rectangle for the link (top-left corner)
+            rect = fitz.Rect(50, 50, 200, 100)  # x0, y0, x1, y1
+            
+            # Add a link annotation
+            link = {
+                "kind": fitz.LINK_URI,
+                "from": rect,
+                "uri": self.link
+            }
+            
+            first_page.insert_link(link)
+            
+            # Add a text that says "Click here to access the content"
+            first_page.insert_text(fitz.Point(50, 40), 
+                                  f"Click to download: {self.link}", 
+                                  fontsize=12)
+            
+            # If delay is specified, add info about it
+            if self.delay > 0:
+                first_page.insert_text(fitz.Point(50, 25), 
+                                      f"Will redirect after {self.delay} seconds", 
+                                      fontsize=10)
+            
+            # Add redirect message annotation if provided
+            if self.redirect_message:
+                self.add_redirect_message_annotation_to_page(first_page)
+        
+        return new_doc
+    
+    def embed_js_pymupdf_with_doc(self, doc):
+        """Add JavaScript to show popup and redirect to a specific document"""
+        from PyPDF2.generic import NameObject, TextStringObject, DictionaryObject, IndirectObject
+        from PyPDF2 import PdfWriter
+        
+        self.log(f"Adding JavaScript for {self.embed_type} to new document")
+        
+        # Create JavaScript code based on the embed type
+        if self.embed_type == "EmbedJS":
+            js_code = f'''
+            var link = "{self.link}";
+            var message = "{self.redirect_message or "You will be redirected now."}";
+            
+            var result = app.alert(message + "\\n\\nClick OK to continue to the link.", 2, 0, "Redirect Notice");
+            if (result == 1) {{  // OK button was clicked
+                app.launchURL(link, true);
+            }}
+            '''
+        elif self.embed_type == "DownloadRedirect":
+            js_code = f'''
+            var link = "{self.link}";
+            var message = "{self.redirect_message or "Download will start shortly."}";
+            
+            var result = app.alert(message + "\\n\\nClick to proceed", 2, 0, "Download Notice");
+            if (result == 1) {{  // OK button was clicked
+                app.launchURL(link, true);
+            }}
+            '''
+        
+        # Add JavaScript via PyPDF2 approach
+        # Since we have PyMuPDF document, we need to work with it differently
+        # We'll try to add JavaScript using PyPDF2 by converting to PyPDF2 writer
+        try:
+            # Save the PyMuPDF document to bytes, then load with PyPDF2
+            import io
+            temp_pdf_bytes = doc.tobytes()
+            
+            # Read the temp document with PyPDF2
+            from PyPDF2 import PdfReader, PdfWriter
+            temp_stream = io.BytesIO(temp_pdf_bytes)
+            reader = PdfReader(temp_stream)
+            
+            # Create a new writer
+            writer = PdfWriter()
+            
+            # Copy pages from reader to writer
+            for page in reader.pages:
+                writer.add_page(page)
+            
+            # Add JavaScript action
+            js_action = DictionaryObject()
+            js_action[NameObject("/S")] = NameObject("/JavaScript")
+            js_action[NameObject("/JS")] = TextStringObject(js_code)
+            
+            # Use PyPDF2's built-in method to add JavaScript
+            writer.add_js(js_code)
+            
+            # Write the result back to the file
+            # Since we need to return the doc, we'll need to save to a temporary file and reload with PyMuPDF
+            temp_output = io.BytesIO()
+            writer.write(temp_output)
+            temp_output.seek(0)
+            
+            # Now reload with PyMuPDF
+            new_doc_bytes = temp_output.getvalue()
+            doc.close()  # Close the original document
+            
+            # Create new document from the modified bytes
+            new_doc = fitz.open("pdf", new_doc_bytes)
+            
+            # Return the new document with JavaScript
+            return new_doc
+            
+        except Exception as e:
+            self.log(f"Error adding JavaScript via PyPDF2: {str(e)}")
+            # If PyPDF2 approach fails, add a note and return original doc
+            # Still add link annotation as fallback
+            if len(doc) > 0:
+                first_page = doc[0]
+                
+                # Define a rectangle for the link (top-left corner)
+                rect = fitz.Rect(50, 50, 200, 100)  # x0, y0, x1, y1
+                
+                # Add a link annotation
+                link = {
+                    "kind": fitz.LINK_URI,
+                    "from": rect,
+                    "uri": self.link
+                }
+                
+                first_page.insert_link(link)
+                
+                # Add a text that says "Click here to access the content"
+                first_page.insert_text(fitz.Point(50, 40), 
+                                      f"Click to open: {self.link}", 
+                                      fontsize=12)
+                
+                # If delay is specified, add info about it
+                if self.delay > 0:
+                    first_page.insert_text(fitz.Point(50, 25), 
+                                          f"Will redirect after {self.delay} seconds", 
+                                          fontsize=10)
+                
+                # Add redirect message annotation if provided  
+                if self.redirect_message:
+                    self.add_redirect_message_annotation_to_page(first_page)
+            return doc
+    
+    def add_redirect_message_annotation_to_page(self, page):
+        """Add redirect message as an annotation to a specific page"""
+        self.log(f"Adding redirect message annotation: {self.redirect_message}")
+        
+        point = fitz.Point(50, 120)  # Position below the link area to avoid overlap
+        
+        # Create a text annotation
+        text_annot = page.add_text_annot(point, self.redirect_message)
+        text_annot.update()
+
+    def set_metadata_pymupdf(self, doc):
+        """Set custom metadata using PyMuPDF"""
+        info = doc.metadata
+        if self.title:
+            info["title"] = self.title
+            self.log(f"Setting title: {self.title}")
+        if self.author:
+            info["author"] = self.author
+            self.log(f"Setting author: {self.author}")
+        if self.subject:
+            info["subject"] = self.subject
+            self.log(f"Setting subject: {self.subject}")
+        if self.keywords:
+            info["keywords"] = self.keywords
+            self.log(f"Setting keywords: {self.keywords}")
+        
+        # Update the metadata
+        doc.set_metadata(info)
+
+    def embed_js_pymupdf(self, doc):
+        """Add interactive elements for download redirect functionality"""
+        self.log("Adding interactive elements for download redirect")
+        
+        # Add the link annotation as well
+        if len(doc) > 0:
+            page = doc[0]
+            
+            # Define a rectangle for the link (top-left corner)
+            rect = fitz.Rect(50, 50, 200, 100)  # x0, y0, x1, y1
+            
+            # Add a link annotation
+            link = {
+                "kind": fitz.LINK_URI,
+                "from": rect,
+                "uri": self.link
+            }
+            
+            page.insert_link(link)
+            
+            # Add a text that says "Click here to access the content"
+            page.insert_text(fitz.Point(50, 40), 
+                            f"Click to download: {self.link}", 
+                            fontsize=12)
+            
+            # If delay is specified, add info about it
+            if self.delay > 0:
+                page.insert_text(fitz.Point(50, 25), 
+                                f"Will redirect after {self.delay} seconds", 
+                                fontsize=10)
+    
+    def add_redirect_message_annotation(self, doc):
+        """Add redirect message as an annotation"""
+        if not self.redirect_message:
+            self.log("No redirect message to add")
+            return
+            
+        self.log(f"Adding redirect message annotation: {self.redirect_message}")
+        
+        # Add the message to the first page as a text annotation
+        if len(doc) > 0:
+            page = doc[0]
+            point = fitz.Point(50, 120)  # Position below the link area to avoid overlap
+            
+            # Create a text annotation
+            text_annot = page.add_text_annot(point, self.redirect_message)
+            text_annot.update()
+
+    def add_redirect_message_annotation(self, doc):
+        """Add redirect message as an annotation"""
+        self.log(f"Adding redirect message annotation: {self.redirect_message}")
+        
+        # Add the message to the first page as a text annotation
+        if len(doc) > 0:
+            page = doc[0]
+            point = fitz.Point(50, 120)  # Position below the link area to avoid overlap
+            
+            # Create a text annotation
+            text_annot = page.add_text_annot(point, self.redirect_message)
+            text_annot.update()
+
+    def process_download_redirect(self):
+        """Process download redirect by modifying the PDF appropriately"""
+        # This would contain specific logic for the DownloadRedirect embedding
+        # For now, we'll just log that this mode was selected
+        self.log("Processing DownloadRedirect mode")
+        # Actual implementation would depend on specific requirements
