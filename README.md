@@ -31,13 +31,13 @@
 
 <br>
 
-## 🎯 OVERVIEW
+## OVERVIEW
 
 **PDmFer** is a command-line tool designed to embed interactive elements into PDF documents with enterprise-grade reliability.
 
 Transform ordinary PDFs into `interactive`, `secure`, and `customized` documents with download redirects, blur effects, password protection, and custom metadata.
 
-### 📄 THE PIPELINE
+### THE PIPELINE
 
 ---
 
@@ -52,7 +52,7 @@ Built with robust error handling and optimized for high-performance processing o
 
 <br>
 
-## 🚀 INSTALLATION
+## INSTALLATION
 
 ### PREREQUISITES
 
@@ -60,7 +60,7 @@ Built with robust error handling and optimized for high-performance processing o
 - pip package manager
 - Virtual environment (recommended)
 
-### 🔨 SETUP STEPS
+### SETUP STEPS
 
 **1. CLONE THE REPOSITORY**
 
@@ -83,7 +83,7 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-### ⚡ QUICK START
+### QUICK START
 
 Get started in seconds:
 
@@ -97,7 +97,7 @@ pdmfer -i input.pdf -o output.pdf --link "https://example.com" --blur Medium --p
 
 <br>
 
-## ⚡ FEATURES
+## FEATURES
 
 <table>
 <tr>
@@ -134,7 +134,7 @@ pdmfer -i input.pdf -o output.pdf --link "https://example.com" --blur Medium --p
 
 <br>
 
-## 📋 USAGE
+## USAGE
 
 ### BASIC SYNTAX
 
@@ -142,7 +142,7 @@ pdmfer -i input.pdf -o output.pdf --link "https://example.com" --blur Medium --p
 pdmfer -i input.pdf -o output.pdf --link "https://example.com" [options...]
 ```
 
-### 🔧 OPTIONS REFERENCE
+### OPTIONS REFERENCE
 
 <table>
 <tr>
