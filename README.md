@@ -105,28 +105,28 @@ pdmfer -i input.pdf -o output.pdf --link "https://example.com" --blur Medium --p
 
 ### CORE CAPABILITIES
 
-- ✅ **Download redirects** embedded in PDFs
-- 🔗 **Custom link integration** for interactive documents
-- 🔒 **Password protection** with AES-128 encryption
-- 📝 **Custom metadata** (Title, Author, Subject, Keywords)
-- 🎨 **Blur effects** (None, Low, Medium, High)
-- 💬 **Custom messages** for pre-download redirects
-- 📊 **Enterprise-grade** error handling
-- 💾 **File-based workflow** for easy integration
+- **Download redirects** embedded in PDFs
+- **Custom link integration** for interactive documents
+- **Password protection** with AES-128 encryption
+- **Custom metadata** (Title, Author, Subject, Keywords)
+- **Blur effects** (None, Low, Medium, High)
+- **Custom messages** for pre-download redirects
+- **Enterprise-grade** error handling
+- **File-based workflow** for easy integration
 
 </td>
 <td width="50%">
 
 ### ADVANCED FEATURES
 
-- 🌐 **Cross-platform** support (Windows, macOS, Linux)
-- ⚡ **High-performance** optimized processing
-- 🔧 **Verbose mode** for detailed logging
-- 📦 **Batch processing** support
-- 🛡️ **Security controls** with JavaScript embedding
-- 🎯 **Link validation** ensuring proper URL formats
-- 🔄 **Multi-library** approach for feature compatibility
-- 📈 **Efficient memory** usage for large PDFs
+- **Cross-platform** support (Windows, macOS, Linux)
+- **High-performance** optimized processing
+- **Verbose mode** for detailed logging
+- **Batch processing** support
+- **Security controls** with JavaScript embedding
+- **Link validation** ensuring proper URL formats
+- **Multi-library** approach for feature compatibility
+- **Efficient memory** usage for large PDFs
 
 </td>
 </tr>
@@ -136,7 +136,7 @@ pdmfer -i input.pdf -o output.pdf --link "https://example.com" --blur Medium --p
 
 ## 📋 USAGE
 
-### 🎯 BASIC SYNTAX
+### BASIC SYNTAX
 
 ```bash
 pdmfer -i input.pdf -o output.pdf --link "https://example.com" [options...]
@@ -221,7 +221,7 @@ pdmfer -i input.pdf -o output.pdf --link "https://example.com" [options...]
 
 <br>
 
-## 💡 EXAMPLES
+## EXAMPLES
 
 ### BASIC OPERATIONS
 
@@ -287,9 +287,9 @@ find . -name "*.pdf" -exec pdmfer -i {} -o processed_{} \
 
 <br>
 
-## 🔬 CORE CONCEPTS
+## CORE CONCEPTS
 
-### 🎨 BLUR EFFECTS EXPLAINED
+### BLUR EFFECTS EXPLAINED
 
 <table>
 <tr>
@@ -312,7 +312,7 @@ find . -name "*.pdf" -exec pdmfer -i {} -o processed_{} \
 
 Blur effects work by converting PDF content to images and applying Gaussian blur filters.
 
-### 📝 METADATA CUSTOMIZATION
+### METADATA CUSTOMIZATION
 
 Custom metadata improves document organization and searchability:
 
@@ -323,25 +323,25 @@ Custom metadata improves document organization and searchability:
 
 <br>
 
-## 🛡️ SECURITY CONSIDERATIONS
+## SECURITY CONSIDERATIONS
 
-### 🔒 PASSWORD PROTECTION
+### PASSWORD PROTECTION
 - Uses **AES-128 encryption** for PDF security
 - Protects against unauthorized access
 - Compatible with standard PDF viewers
 
-### 🔐 JAVASCRIPT SECURITY
+### JAVASCRIPT SECURITY
 - All JavaScript is embedded within the PDF
 - Execution requires JavaScript-enabled viewer
 - Follows PDF security standards
 
-### ✅ LINK VALIDATION
+### LINK VALIDATION
 - All links must use full URL format (http:// or https://)
 - Links are validated before PDF creation
 
 <br>
 
-## ⚠️ TROUBLESHOOTING
+## TROUBLESHOOTING
 
 ### COMMON ISSUES
 
@@ -366,7 +366,7 @@ Custom metadata improves document organization and searchability:
 
 </details>
 
-### 💬 VERBOSE MODE
+### VERBOSE MODE
 
 Use the `-v` flag for detailed output:
 
@@ -376,18 +376,18 @@ pdmfer -i input.pdf -o output.pdf --link "https://example.com" -v
 
 <br>
 
-## 📊 PERFORMANCE
+## PERFORMANCE
 
 PDmFer is designed for high-performance processing:
 
-- ⚡ **Efficient memory usage** for large PDFs
-- 🚀 **Optimized processing** algorithms
-- 🔧 **Multi-library approach** for feature compatibility
-- 📈 **Enterprise-grade** reliability
+- **Efficient memory usage** for large PDFs
+- **Optimized processing** algorithms
+- **Multi-library approach** for feature compatibility
+- **Enterprise-grade** reliability
 
 <br>
 
-## 🤝 CONTRIBUTING
+## CONTRIBUTING
 
 Contributions are welcome! Feel free to:
 
@@ -405,7 +405,7 @@ Contributions are welcome! Feel free to:
 
 <br>
 
-## 📄 LICENSE
+## LICENSE
 
 **PDmFer** is available in the **public domain**. See [UNLICENSE.md](./UNLICENSE.md) for details.
 
