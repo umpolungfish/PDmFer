@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>📄 PDmFer</h1>
+  <h1>PDmFer</h1>
   <p><b>THE PDF EMBEDDING POWERHOUSE</b></p>
   
   <img src="./images/pdmfer.jpg" alt="pdmfer logo" width="400">
